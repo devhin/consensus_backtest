@@ -7,7 +7,7 @@ library(xlsx)
 library(readxl)
 library(zoom)
 libelles <- read_delim('libelles.csv', ';')
-data <- as.data.frame(read_excel("data_test.xlsx"))
+data <- as.data.frame(read_excel("data.xlsx"))
 rownames(data) <- data[,1]
 data <- data[,2:(2 * nrow(libelles) + 1)]
 # alpha between -pi/2 and pi/2.
@@ -44,7 +44,7 @@ c_alpha_fctn <- function(c_p, a) {
 for (i in libelles$ticker_boursorama) {
   data[1, paste0(i, '_n')] <- sample(1:100,1)
 }
-data[1, "valo"] <- sum(data[1, 1:nrow(libelles)]*data[1, (2*nrow(libelles)+1):(3*nrow(libelles))])
+data[1, "valo"] <- sum(as.numeric(data[1, 1:nrow(libelles)])*as.numeric(data[1, (2*nrow(libelles)+1):(3*nrow(libelles))]))
 
 alpha <- seq(-pi/2+0.01, pi/2-0.01, 0.05)
 pm_value <- rep(0,length(alpha))
@@ -54,16 +54,16 @@ for (k in 1:length(alpha)) {
   for (j in 2:nrow(data)) {
     c_alpha_tot <- 0
     for (i in libelles$ticker_boursorama) {
-      c_prime <- c_prime_fctn(data[(j-1), paste0(i, '_c')])
+      c_prime <- c_prime_fctn(as.numeric(data[(j-1), paste0(i, '_c')]))
       c_alpha <- c_alpha_fctn(c_prime, res_alpha$alpha[k])
       c_alpha_tot <- c_alpha_tot + c_alpha
     }
     for (i in libelles$ticker_boursorama) {
-      c_prime <- c_prime_fctn(data[(j-1), paste0(i, '_c')])
+      c_prime <- c_prime_fctn(as.numeric(data[(j-1), paste0(i, '_c')]))
       c_alpha <- c_alpha_fctn(c_prime, res_alpha$alpha[k])
-      data[j, paste0(i, '_n')] <- c_alpha/c_alpha_tot*data$valo[(j-1)]/data[(j-1), paste0(i, '_p')]
+      data[j, paste0(i, '_n')] <- c_alpha/c_alpha_tot*as.numeric(data$valo[(j-1)])/as.numeric(data[(j-1), paste0(i, '_p')])
     }
-    data[j, 'valo'] <- sum(data[j, 1:nrow(libelles)]*data[j, (2*nrow(libelles)+1):(3*nrow(libelles))])
+    data[j, 'valo'] <- sum(as.numeric(data[j, 1:nrow(libelles)])*as.numeric(data[j, (2*nrow(libelles)+1):(3*nrow(libelles))]))
   }
   res_alpha$pm_value[k] <- (data$valo[nrow(data)]/data$valo[1]-1)*100
 }
